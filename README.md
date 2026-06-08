@@ -31,8 +31,7 @@ dist/index.html
 
 ```bash
 python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
-  --user-agent "your-name your-email@example.com" \
-  --market-caps examples/market_caps.example.json
+  --user-agent "your-name your-email@example.com"
 
 python3 -m dilution_dashboard dashboard --out dist/index.html
 ```
@@ -82,7 +81,23 @@ BKKT
 
 ### Market Cap
 
-SEC 本身不提供实时市值。第一版用可选 JSON 输入：
+SEC 本身不提供实时市值。CapTable Lens 默认用 Yahoo Finance quote endpoint 批量抓取 `marketCap`，并缓存 12 小时：
+
+```bash
+python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
+  --user-agent "your-name your-email@example.com" \
+  --market-provider yahoo
+```
+
+如果你不想自动抓市值，可以关闭：
+
+```bash
+python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
+  --user-agent "your-name your-email@example.com" \
+  --market-provider none
+```
+
+也可以用 JSON 手动覆盖，手动值优先级最高：
 
 ```json
 {
@@ -91,7 +106,13 @@ SEC 本身不提供实时市值。第一版用可选 JSON 输入：
 }
 ```
 
-如果不提供市值，dashboard 仍会生成，但 `offering / market cap` 和 overhang 判断会弱一些。后续可以接 Polygon、IEX、Tiingo、FMP、Bloomberg 或 FactSet。
+```bash
+python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
+  --user-agent "your-name your-email@example.com" \
+  --market-caps examples/market_caps.example.json
+```
+
+如果网络不可用或某些 ticker 没拿到市值，dashboard 仍会生成，但 `发行金额 / 市值` 和 overhang 判断会弱一些。后续可以接 Polygon、IEX、Tiingo、FMP、Bloomberg 或 FactSet 作为更稳定的数据源。
 
 ## 输出指标
 
@@ -123,6 +144,7 @@ SEC 本身不提供实时市值。第一版用可选 JSON 输入：
 dilution_dashboard/
   providers.py     Pluggable EDGAR provider boundary
   integrations.py  Referenced OSS projects and integration status
+  market_data.py   Market cap fetch/cache helpers
   sec_client.py    SEC EDGAR client with local cache
   parser.py        Filing text parser
   facts.py         XBRL companyfacts extraction

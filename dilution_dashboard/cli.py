@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
 from .dashboard import render_dashboard
 from .facts import snapshot_metrics
 from .integrations import INTEGRATION_SOURCES
+from .market_data import MarketDataError, resolve_market_caps
 from .models import CompanySnapshot, FilingSignal
 from .parser import parse_filing
 from .providers import DirectSecProvider, EdgarProvider
@@ -31,7 +31,10 @@ def main(argv: list[str] | None = None) -> int:
     fetch.add_argument("--db", default="data/dilution.sqlite")
     fetch.add_argument("--cache-dir", default=".cache/sec")
     fetch.add_argument("--limit", type=int, default=80)
-    fetch.add_argument("--market-caps", help="Optional JSON map, e.g. {'AAOI': 1000000000}")
+    fetch.add_argument("--market-caps", help="Optional JSON map that overrides fetched market caps")
+    fetch.add_argument("--market-provider", choices=["yahoo", "none"], default="yahoo")
+    fetch.add_argument("--market-cache-dir", default=".cache/market")
+    fetch.add_argument("--market-cache-hours", type=float, default=12)
 
     dash = sub.add_parser("dashboard", help="Render static HTML dashboard from the SQLite database")
     dash.add_argument("--db", default="data/dilution.sqlite")
@@ -90,7 +93,19 @@ def run_fetch(args: argparse.Namespace) -> int:
         print("No tickers supplied.", file=sys.stderr)
         return 2
 
-    market_caps = load_market_caps(args.market_caps)
+    try:
+        market_caps = resolve_market_caps(
+            tickers,
+            manual_path=args.market_caps,
+            provider=args.market_provider,
+            cache_dir=args.market_cache_dir,
+            max_age_seconds=int(args.market_cache_hours * 60 * 60),
+        )
+        print(f"[market] resolved market caps for {len(market_caps)}/{len(tickers)} tickers")
+    except MarketDataError as exc:
+        print(f"[market warning] {exc}", file=sys.stderr)
+        print("[market warning] continuing without fetched market caps; use --market-caps JSON or retry later", file=sys.stderr)
+        market_caps = resolve_market_caps(tickers, manual_path=args.market_caps, provider="none")
     provider = DirectSecProvider(args.user_agent, args.cache_dir)
     ticker_map = provider.ticker_map()
     scores = []
@@ -165,13 +180,6 @@ def collect_tickers(args_tickers: list[str], watchlist: str | None) -> list[str]
             if line:
                 tickers.append(line.upper())
     return sorted(set(tickers))
-
-
-def load_market_caps(path: str | None) -> dict[str, float]:
-    if not path:
-        return {}
-    raw = json.loads(Path(path).read_text(encoding="utf-8"))
-    return {ticker.upper(): float(value) for ticker, value in raw.items()}
 
 
 def print_sources() -> None:

@@ -11,7 +11,6 @@ CapTable Lens 可以扩展成每日自动扫描 1000 家公司的融资稀释工
 ```bash
 python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
   --user-agent "your-name your-email@example.com" \
-  --market-caps examples/market_caps.example.json \
   --limit 25
 
 python3 -m dilution_dashboard workbench
@@ -44,13 +43,19 @@ examples/watchlist.smallcap-growth.txt
 
 ## 市值数据
 
-当前 MVP 用 JSON 传入市值：
+当前版本默认用 Yahoo Finance quote endpoint 批量抓取 `marketCap`，并缓存 12 小时：
+
+```bash
+--market-provider yahoo
+```
+
+如果你有更可信的市值文件，可以用 JSON 覆盖：
 
 ```bash
 --market-caps examples/market_caps.example.json
 ```
 
-下一步应接行情 API，自动获取 market cap。推荐优先级：
+后续更稳定的数据源推荐优先级：
 
 1. Polygon / Tiingo / IEX / FMP 这类 API
 2. yfinance 作为个人研究 fallback
@@ -80,4 +85,3 @@ examples/watchlist.smallcap-growth.txt
 - API key secret 管理
 - Actions 运行时间限制
 - 生成结果是否 commit 回仓库或发布到 Pages
-
