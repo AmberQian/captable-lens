@@ -36,6 +36,21 @@ def main(argv: list[str] | None = None) -> int:
     fetch.add_argument("--market-cache-dir", default=".cache/market")
     fetch.add_argument("--market-cache-hours", type=float, default=12)
 
+    scan = sub.add_parser("scan", help="Fetch SEC data, score companies, and render the full workbench")
+    scan.add_argument("tickers", nargs="*", help="Ticker symbols")
+    scan.add_argument("--watchlist", help="File containing one ticker per line")
+    scan.add_argument("--user-agent", required=True, help="SEC User-Agent, include contact email")
+    scan.add_argument("--db", default="data/dilution.sqlite")
+    scan.add_argument("--cache-dir", default=".cache/sec")
+    scan.add_argument("--limit", type=int, default=25)
+    scan.add_argument("--market-caps", help="Optional JSON map that overrides fetched market caps")
+    scan.add_argument("--market-provider", choices=["yahoo", "none"], default="yahoo")
+    scan.add_argument("--market-cache-dir", default=".cache/market")
+    scan.add_argument("--market-cache-hours", type=float, default=12)
+    scan.add_argument("--dashboard-out", default="dist/index.html")
+    scan.add_argument("--report-out", default="dist/report.html")
+    scan.add_argument("--csv-out", default="dist/report.csv")
+
     dash = sub.add_parser("dashboard", help="Render static HTML dashboard from the SQLite database")
     dash.add_argument("--db", default="data/dilution.sqlite")
     dash.add_argument("--out", default="dist/index.html")
@@ -60,6 +75,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.cmd == "fetch":
         return run_fetch(args)
+    if args.cmd == "scan":
+        result = run_fetch(args)
+        if result != 0:
+            return result
+        render_dashboard(args.db, args.dashboard_out)
+        write_daily_report(args.db, args.report_out, args.csv_out)
+        print(f"Workbench dashboard written to {Path(args.dashboard_out).resolve()}")
+        print(f"Daily report written to {Path(args.report_out).resolve()}")
+        print(f"CSV report written to {Path(args.csv_out).resolve()}")
+        return 0
     if args.cmd == "dashboard":
         render_dashboard(args.db, args.out)
         print(f"Dashboard written to {Path(args.out).resolve()}")

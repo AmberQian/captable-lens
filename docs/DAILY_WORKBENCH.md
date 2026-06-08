@@ -9,11 +9,9 @@ CapTable Lens 可以扩展成每日自动扫描 1000 家公司的融资稀释工
 ## 推荐流程
 
 ```bash
-python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
+python3 -m dilution_dashboard scan --watchlist examples/watchlist.test.txt \
   --user-agent "your-name your-email@example.com" \
   --limit 25
-
-python3 -m dilution_dashboard workbench
 ```
 
 `--limit 25` 表示每家公司最多检查最近 25 个相关表格。对 1000 家公司，第一版不建议直接拉最近 80 个文件全文，会慢，也没必要。
@@ -33,10 +31,11 @@ python3 -m dilution_dashboard workbench
 真实 1000 公司 watchlist 建议单独维护，例如：
 
 ```text
+examples/watchlist.test.txt
 examples/watchlist.ai-infra.txt
-examples/watchlist.semiconductors.txt
+examples/watchlist.semiconductors-optical.txt
 examples/watchlist.crypto-miners.txt
-examples/watchlist.smallcap-growth.txt
+examples/watchlist.smallcap-dilution-risk.txt
 ```
 
 每行一个 ticker。

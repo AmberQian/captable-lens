@@ -30,10 +30,8 @@ dist/index.html
 抓真实 SEC 数据：
 
 ```bash
-python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
+python3 -m dilution_dashboard scan --watchlist examples/watchlist.test.txt \
   --user-agent "your-name your-email@example.com"
-
-python3 -m dilution_dashboard dashboard --out dist/index.html
 ```
 
 然后在浏览器打开：
@@ -79,6 +77,16 @@ IREN
 BKKT
 ```
 
+已内置几组研究模板：
+
+```text
+examples/watchlist.test.txt
+examples/watchlist.ai-infra.txt
+examples/watchlist.semiconductors-optical.txt
+examples/watchlist.crypto-miners.txt
+examples/watchlist.smallcap-dilution-risk.txt
+```
+
 ### Market Cap
 
 SEC 本身不提供实时市值。CapTable Lens 默认用 Yahoo Finance quote endpoint 批量抓取 `marketCap`，并缓存 12 小时：
@@ -87,6 +95,13 @@ SEC 本身不提供实时市值。CapTable Lens 默认用 Yahoo Finance quote en
 python3 -m dilution_dashboard fetch --watchlist examples/watchlist.txt \
   --user-agent "your-name your-email@example.com" \
   --market-provider yahoo
+```
+
+一键扫描并生成完整工作台：
+
+```bash
+python3 -m dilution_dashboard scan --watchlist examples/watchlist.ai-infra.txt \
+  --user-agent "your-name your-email@example.com"
 ```
 
 如果你不想自动抓市值，可以关闭：
