@@ -1,0 +1,11 @@
+[project]
+name = "captable-lens"
+version = "0.1.0"
+description = "A local SEC dilution and financing-structure dashboard for accretive vs predatory capital raises."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+captable-lens = "dilution_dashboard.cli:main"
+
