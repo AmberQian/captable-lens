@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from copy import deepcopy
+
 from .models import CompanySnapshot, ScoreResult
 
 
 def score_company(snapshot: CompanySnapshot) -> ScoreResult:
+    snapshot = deepcopy(snapshot)
     predatory = 0
     accretive = 0
     overhang = 0
@@ -108,4 +111,5 @@ def _growth(latest: float | None, prior: float | None) -> float | None:
     if latest is None or prior in (None, 0):
         return None
     return (latest - prior) / abs(prior)
+
 
