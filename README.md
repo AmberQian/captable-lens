@@ -1,5 +1,12 @@
 # CapTable Lens
 
+## Offline Agent interface and annual metric policy
+
+`python -m dilution_dashboard.agent` accepts a CompanySnapshot JSON object on stdin
+and returns a versioned, read-only screening result with missing-data warnings.
+See [Agent interface](docs/AGENT_INTERFACE.md) for the input and annual financial
+period policy, and [October review scope](docs/OCTOBER_REVIEW_SCOPE.md) for validation.
+
 CapTable Lens 用于自动化筛查一家公司的“增殖方式”：发行新股、ATM、S-3 shelf、PIPE、可转债、债务置换等融资，到底更像 accretive 还是 predatory。
 
 第一版定位是半自动研究终端：
